@@ -15,17 +15,15 @@ import org.w3c.dom.NodeList;
  * @author hstancheva
  *
  */
-public class Main {
+public class Main2 {
 	/**
 	 * @param args
-	 *            xml file (path) 
-	 *            attribute name attribute 
-	 *            value
+	 * 
 	 */
 	public static void main(final String[] args) {
 		String filename = args[0];
-		String attribute = args[1];
-		String value = args[2];
+		String[] attributes = args[1].split(",");
+		String[] values = args[2].split(",");
 
 		try {
 			File xmlFile = new File("src\\main\\resources\\" + filename);
@@ -33,20 +31,30 @@ public class Main {
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			Document document = dBuilder.parse(xmlFile);
 			document.getDocumentElement().normalize();
-			// System.out.println("Root element :" +
-			// document.getDocumentElement().getNodeName());
 
 			NodeList allNodes = document.getElementsByTagName("*");
+
 			for (int i = 0; i < allNodes.getLength(); i++) {
 				Node currentNode = allNodes.item(i);
+
 				if (currentNode.getNodeType() == Node.ELEMENT_NODE) {
-					NamedNodeMap attributes = currentNode.getAttributes();
-					for (int a = 0; a < attributes.getLength(); a++) {
-						Node currentAttribute = attributes.item(a);
-						if (currentAttribute.getNodeName().equals(attribute)
-								&& currentAttribute.getNodeValue().equals(value)) {
-							System.out.println(currentAttribute.getNodeValue() + ": " + currentNode.getTextContent());
+					NamedNodeMap currentAttributes = currentNode.getAttributes();
+					boolean isRelevant = false;
+					String curVal = null;
+
+					for (int a = 0; a < currentAttributes.getLength(); a++) {
+						Node currentAttribute = currentAttributes.item(a);
+						for (int j = 0; j < attributes.length; j++) {
+							if (currentAttribute.getNodeName().equals(attributes[j])
+									&& currentAttribute.getNodeValue().equals(values[j])) {
+								isRelevant = true;
+								curVal = values[j];
+								break;
+							}
 						}
+					}
+					if (isRelevant == true) {
+						System.out.println(curVal + ": " + currentNode.getTextContent());
 					}
 				}
 			}
@@ -54,9 +62,4 @@ public class Main {
 			e.printStackTrace();
 		}
 	}
-
-	private final static String PATH_TO_XML = "ABASData\\RecordSet\\Record\\Head\\Field";
-	private final static String FILENAME = "TaskJunJava_201804.xml";
-
-	// SAX is faster than DOM and use less memory.
 }
